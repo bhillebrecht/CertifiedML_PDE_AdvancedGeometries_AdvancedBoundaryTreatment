@@ -33,7 +33,7 @@ The data is then summarized using
 
 The different parametrizations of the training weighting of the boundary error and its temporal derivative can be found in different folders listed in the following table.
 
-| $\alpha$ | Foldername |
+| $\lambda_{bc}$ | Foldername |
 |----------|------------|
 | 0.1      | base_framework/heat_equation_soft_bcs_param4/heat_equation.py |
 | 1.0      | base_framework/heat_equation_soft_bcs_param2/heat_equation.py |
