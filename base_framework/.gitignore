@@ -1,0 +1,12 @@
+# do not store generateable files which are deterministic
+heat_equation_soft_bcs*/input_data/test_data/*.csv
+heat_equation_soft_bcs*/input_data/test_data/*.pdf
+heat_equation_soft_bcs*/input_data/*.csv
+heat_equation_soft_bcs*/input_data/*.pdf
+
+# do not store intermediate checkpoint files and every output data except for error listings
+heat_equation_soft_bcs*/output_data/checkpoints/easy_checkpoint_*.h5
+heat_equation_soft_bcs*/output_data/run_tanh_values/run_tanh_test_data_t0.*.csv
+
+# do not store images
+heat_equation_soft_bcs*/output_data/run_tanh_figures/*

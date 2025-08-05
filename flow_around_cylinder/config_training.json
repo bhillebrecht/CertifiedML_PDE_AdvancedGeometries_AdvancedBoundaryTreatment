@@ -1,0 +1,39 @@
+{
+    "epochs" : 10000,
+    "n_phys" : 1000,
+    "optimizer" : "adam",
+    "log_frequency" : 100,
+    "validation_frequency" : 500,
+    "learning_rate": 0.01,
+    "w_data": 0.8,
+    "problem_specifics": [
+        {
+            "name": "mesh", 
+            "value": "../fem_discretization_framework/output_data/flow_around_cylinder/"
+        },
+        {
+            "name": "Tmax", 
+            "value": 4.0
+        },
+        {
+            "name": "checkpoints_dir",
+            "value": "checkpoints"
+        },
+        {
+            "name": "influx_weight", 
+            "value": 5.0
+        },
+        {
+            "name": "outlet_weight", 
+            "value": 0
+        },
+        {
+            "name": "wall_weight", 
+            "value": 10.0
+        },
+        {
+            "name": "div_free_weight", 
+            "value": 10.0
+        }
+    ]
+}
