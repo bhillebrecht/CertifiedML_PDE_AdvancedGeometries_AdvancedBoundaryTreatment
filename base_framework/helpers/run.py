@@ -374,5 +374,5 @@ def eval_pinn(create_fun, load_fun, input_file, appl_path, epsilon, eet, callout
 
     # call post_run_callout
     if callout is not None: 
-        callout(os.path.join(appl_path, 'output_data', 'run_'+get_prefix()+'figures'), X_data, Y_pred, E_pred, N_SP_pred, Y_data, tail)
+        callout(os.path.join(appl_path, 'output_data'), X_data, Y_pred, E_pred, N_SP_pred, Y_data, tail)
 

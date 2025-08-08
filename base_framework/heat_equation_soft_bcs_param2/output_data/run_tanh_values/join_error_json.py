@@ -27,10 +27,12 @@
 import os
 import sys
 import numpy as np
+import matplotlib.pyplot as plt 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from helpers.csv_helpers import export_csv
 from helpers.nn_parametrization import get_param_as_float, has_param
+from helpers.plotting import new_fig, save_fig
 
 if __name__ == "__main__":
 
@@ -67,10 +69,9 @@ if __name__ == "__main__":
             data[index, 9] = np.sum(data[index, 1:7])
 
             data[index, 10] = get_param_as_float(os.path.join(os.path.dirname(__file__), file), "E_ref")
-
+            
             data[index, 11] = data[index, 5]/data[index, 6]
             data[index, 12] = 1.0/data[index, 11]
-
             index = index+1
 
     sortedidx = np.argsort(data[:,0])
@@ -78,3 +79,28 @@ if __name__ == "__main__":
 
     export_csv(data, os.path.join(os.path.dirname(__file__), prefix + "_error_over_time.csv"), columnheaders=np.array(["t", "E_init", "E_PI", "E_bc", "E_bc_int_ub", "E_bc_int_ubdot", "E_bc_sum_ubt", "E_bc_sum_ub0", "N_SP", "E_tot",  "E_ref", "bc_intubdot_by_sumubt", "bc_sububt_by_intubdot"]), rowheaders=np.linspace(1, data.shape[0], data.shape[0]))
 
+    fig = new_fig()
+    ax = fig.add_subplot(1, 1, 1)
+
+    ax.set( ylabel=r'$E(t)$')
+    ax.set( xlabel="$t$")
+    ax.set (yscale="log")
+
+    ax.grid(True, which='both')
+    ax.set(xlim=[0,0.5])
+
+    ax.plot(data[:,0:1], data[:,1:2], linewidth=2, linestyle="-", label="$E_\mathrm{init}$")
+    ax.plot(data[:,0:1], data[:,2:3], linewidth=2, linestyle="--", label="$E_\mathrm{evo}$")
+    ax.plot(data[:,0:1], data[:,4:5], linewidth=2, linestyle=":", label="$E_{\mathrm{bc}, \int, 1}$")
+    ax.plot(data[:,0:1], data[:,5:6], linewidth=2, linestyle="--", label="$E_{\mathrm{bc}, \int, 2}$")
+    ax.plot(data[:,0:1], data[:,6:7], linewidth=2, linestyle=":", label="$E_{\mathrm{bc}, t}$")
+    ax.plot(data[:,0:1], data[:,7:8], linewidth=2, linestyle="--", label="$E_{\mathrm{bc}, 0}$")
+    ax.plot(data[:,0:1], data[:,9:10], linewidth=2, linestyle=":", label="$E_{tot}$")
+    ax.plot(data[:,0:1], data[:,10:11], linewidth=2, linestyle="-", label="$E_{ref}$")
+
+
+    ax.legend(loc='best')
+    fig.tight_layout()
+
+    plt.show()
+    save_fig(fig, "all_errors_plotted_0_05", os.path.dirname(__file__))

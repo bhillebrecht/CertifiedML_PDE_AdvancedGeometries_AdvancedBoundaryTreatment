@@ -189,6 +189,9 @@ df = pd.DataFrame({
     "area_per_node" : volume_all
 })
 
+if not os.path.exists(os.path.join(foldername, "reference_solution")):
+    os.mkdir(os.path.join(foldername, "reference_solution"))
+
 for i in range(n_min, n_max):
     df_tmp = pd.DataFrame({  "modes_"+str(i-n_min) : eigenmodes_eval[:, i]})
     df = pd.concat([df, df_tmp], axis=1)

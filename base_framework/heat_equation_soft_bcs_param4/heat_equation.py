@@ -299,14 +299,14 @@ def post_eval_callout(outdir, X_data, Y_pred, E_pred, N_SP_pred, Y_data=None, ta
 #    fig.tight_layout()
 ##    save_fig(fig, "output_"+ str(X_data[0,0]) , outdir)
     
-    with open(os.path.join(outdir, "..", "run_"+get_prefix()+"values", "run_" + get_prefix() +tail[:-4] + "_error.json"), 'r') as file:
+    with open(os.path.join(outdir, "run_"+get_prefix()+"values", "run_" + get_prefix() +tail[:-4] + "_error.json"), 'r') as file:
         data = file.read()
         data = json.loads(data)
 
     error =  (Y_pred[:,0] - Y_data[:,0])**2
     data['E_ref'] = np.sqrt(compute_integral_trpz(error, X_data[1,1]- X_data[0,1]))
 
-    out_file = open( os.path.join(outdir, "..", "run_"+get_prefix()+"values", "run_" + get_prefix() +tail[:-4] + "_error.json"), "w")
+    out_file = open( os.path.join(outdir, "run_"+get_prefix()+"values", "run_" + get_prefix() +tail[:-4] + "_error.json"), "w")
     json.dump(data, out_file, indent=4)
     out_file.close()
 

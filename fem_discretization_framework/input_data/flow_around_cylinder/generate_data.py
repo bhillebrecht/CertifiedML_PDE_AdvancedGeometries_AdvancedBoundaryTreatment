@@ -45,8 +45,11 @@
 #
 
 # %%
-import gmsh
 import os
+try:
+    current_dir = os.path.dirname(__file__)
+except:
+    current_dir = os.getcwd()
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -60,6 +63,7 @@ from dolfinx.fem.petsc import (apply_lifting, assemble_matrix, assemble_vector,
 from dolfinx.geometry import bb_tree, compute_collisions_points, compute_colliding_cells
 from dolfinx.io import (XDMFFile, distribute_entity_data, gmshio)
 from dolfinx.mesh import create_mesh, meshtags_from_entities, locate_entities_boundary
+import gmsh
 
 gmsh.initialize()
 
@@ -210,7 +214,7 @@ for i in range(60):
         if only_dirichlet:
             filename = filename + "_only_dirichlet"
         filename = filename +"_"+str(index)+".xdmf"
-        with XDMFFile(MPI.COMM_WORLD,filename, "w") as file:
+        with XDMFFile(MPI.COMM_WORLD, os.path.join(current_dir, filename), "w") as file:
             file.write_mesh(msh)
             file.write_meshtags(ft, msh.geometry)
             file.close()
@@ -251,7 +255,7 @@ filename =  "flow_around_cylinder_mesh_xoff_"+str(x_buffer)
 if only_dirichlet:
     filename = filename + "_only_dirichlet"
 filename = filename +".xdmf"
-with XDMFFile(MPI.COMM_WORLD,filename, "w") as file:
+with XDMFFile(MPI.COMM_WORLD,os.path.join(current_dir, filename), "w") as file:
     file.write_mesh(msh)
     file.write_meshtags(ft, msh.geometry)
     file.close()

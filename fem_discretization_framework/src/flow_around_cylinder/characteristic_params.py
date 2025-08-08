@@ -48,6 +48,11 @@
 
 # %%
 import os
+try:
+    current_dir = os.path.dirname(__file__)
+except:
+    current_dir = os.getcwd()
+
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -81,8 +86,8 @@ from dolfinx.mesh import refine, transfer_meshtag, RefinementOption
 from dolfinx import mesh, fem
 
 
-sys.path.append(os.path.join(os.getcwd(), "..", "util"))
-sys.path.append(os.path.join(os.getcwd(), ".."))
+sys.path.append(os.path.join(current_dir, "..", "util"))
+sys.path.append(os.path.join(current_dir, ".."))
 
 from xdmf_helper import load_xdmf
 
@@ -93,7 +98,7 @@ gmsh.initialize()
 
 # %%
 ## number of meshes
-n_refine = 60
+n_refine = 10
 
 # %%
 # dimension mesh
@@ -210,7 +215,7 @@ for i in range(n_refine):
         if only_dirichlet:
             filename = filename + "_only_dirichlet"
         filename = filename +"_"+str(index)+".xdmf"
-        filepath = os.path.join(os.getcwd(), "..", "..", "output_data", "flow_around_cylinder", filename)
+        filepath = os.path.join(current_dir, "..", "..", "output_data", "flow_around_cylinder", filename)
         with XDMFFile(MPI.COMM_WORLD,filepath, "w") as file:
             file.write_mesh(msh)
             file.write_meshtags(ft, msh.geometry)
@@ -556,9 +561,6 @@ def compute_A(domain):
 
 
 # %%
-path_to_mesh = os.path.join(os.getcwd(), "..","..", "input_data","flow_around_cylinder", "flow_around_cylinder_mesh_xoff_0.0.xdmf")
-mesh, facet_tags = load_xdmf(path_to_mesh)
-
 n_nodes = np.zeros(n_refine)
 D0_norm = np.zeros(n_refine)
 AD0_norm = np.zeros(n_refine)
@@ -566,7 +568,7 @@ A0_lrev = np.zeros(n_refine)
 
 for i in range(n_refine):
     filename =  "flow_around_cylinder_mesh_xoff_"+str(x_buffer)+"_"+str(i+1)+".xdmf"
-    filepath = os.path.join(os.getcwd(), "..", "..", "output_data", "flow_around_cylinder", filename)
+    filepath = os.path.join(current_dir, "..", "..", "output_data", "flow_around_cylinder", filename)
     mesh, facet_tags = load_xdmf(filepath)
     n_nodes[i] = mesh.geometry.x.shape[0]
 
@@ -589,18 +591,16 @@ for i in range(n_refine):
     # compute A
     n_coords = mesh.geometry.x.shape[0]
     A = compute_A(mesh)[0:2*n_coords, 0:2*n_coords]
-    print(sp.linalg.norm(A-A.T))
     _, helper, _ = svds(A, k=1, which='LM', tol=1e-6, maxiter=10000)
-    _, helper2, _ = svds(A- helper[0]*sparse.eye(n_coords*2), k=1, which='LM', tol=1e-6, maxiter=10000)
+    _, helper2, _ = svds(A- helper[0]*sp.eye(n_coords*2), k=1, which='LM', tol=1e-6, maxiter=10000)
     A0_lrev[i] = helper2[0] + helper[0]
-    AD0 = A.dot(sparse.vstack([D0, D0], format=D0.format))
+    AD0 = A.dot(sp.vstack([D0, D0], format=D0.format))
     AD0_norm[i] = get_scaled_matrix_norm_sparse(AD0, surface_all_inv, np.concatenate([volume_all, volume_all], axis=0))
 
-    print(i, n_nodes[i], A0_lrev[i], D0_norm[i], AD0_norm[i])
-    
+    print("Mesh no. ", i, " with ", n_nodes[i], " nodes: ", A0_lrev[i],", ", D0_norm[i],", ", AD0_norm[i],", ", sp.linalg.norm(A-A.T), " (omega_n, norm(Dn0), norm(AnDn0), norm(An-An.T))")
+
 
 # %%
-import tikzplotlib
 fig, axs = plt.subplots(ncols=1, nrows=3, layout="constrained")
 
 axs[0].plot(n_nodes, A0_lrev, 'k+:')
@@ -624,11 +624,10 @@ axs[2].set_yticks([0.006, 0.004, 0.002, 0])
 axs[2].set_ylabel("$\|\mathfrak{A}_n \mathfrak{D}_{n,0}\|_{L(X_n, U)}$")
 axs[2].set_xlabel("Number of vertices in mesh $n$")
 
-tikzplotlib.save(os.path.join("..", "..", "..", "..", "latex", "stokes_characteristic_params.tex"))
-
+plt.show()
 # %%
 df = pd.DataFrame({"n_nodes": n_nodes, "A0_lrev" : A0_lrev,  "D0_norm" : D0_norm, "AD0_norm" : AD0_norm})
-df.to_csv(os.path.join(os.getcwd(), "..", "..", "output_data", "flow_around_cylinder", "characteristic_parameters_stokes.csv"))
+df.to_csv(os.path.join(current_dir, "..", "..", "output_data", "flow_around_cylinder", "characteristic_parameters_stokes.csv"))
 
 # %% [markdown]
 # ### Clean up artifacts and meshes
@@ -638,8 +637,16 @@ for index in range(n_refine):
     filename =  "flow_around_cylinder_mesh_xoff_"+str(x_buffer)
     if only_dirichlet:
         filename = filename + "_only_dirichlet"
-    filename = filename +"_"+str(index)+".xdmf"
-    filepath = os.path.join(os.getcwd(), "..", "..", "output_data", "flow_around_cylinder", filename)
+    filename = filename +"_"+str(index+1)
+    filepath = os.path.join(current_dir, "..", "..", "output_data", "flow_around_cylinder", filename)
+    try:
+        os.remove(filepath + ".xdmf")
+    except:
+        print("Could not remove file: ", filepath + ".xdmf")
+    try:
+        os.remove(filepath + ".h5")
+    except:
+        print("Could not remove file: ", filepath + ".h5")
 
 # %% [markdown]
 #

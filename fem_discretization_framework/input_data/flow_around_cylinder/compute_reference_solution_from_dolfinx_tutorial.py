@@ -23,6 +23,14 @@
 #     - reference_solution.csv
 #     - mesh_for_visualization.xdmf and .h5
 #
+
+# fix file directory to compensate for discrepancies in Jupyter Notebook and script execution
+import os 
+try:
+    current_dir = os.path.dirname(__file__)
+except:
+    current_dir = os.getcwd()
+
 # ## Original Documentation
 #
 # Author: JÃ¸rgen S. Dokken
@@ -63,6 +71,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import tqdm.autonotebook
+import pandas as pd 
+from pathlib import Path
 
 from mpi4py import MPI
 from petsc4py import PETSc
@@ -188,7 +198,7 @@ from dolfinx.io import XDMFFile
 mesh, _, ft = gmshio.model_to_mesh(gmsh.model, mesh_comm, model_rank, gdim=gdim)
 ft.name = "mesh_tags"
 
-with XDMFFile(MPI.COMM_WORLD, "mesh_for_visualization.xdmf", "w") as file:
+with XDMFFile(MPI.COMM_WORLD, os.path.join(current_dir, "mesh_for_visualization.xdmf"), "w") as file:
     file.write_mesh(mesh)
     file.write_meshtags(ft, mesh.geometry)
     file.close()
@@ -436,8 +446,6 @@ for i in range(points.shape[0]):
 cell_indices = np.array(cell_indices)
 
 # +
-from pathlib import Path
-import pandas as pd 
 
 df = pd.DataFrame({
     "x" : mesh.geometry.x[:, 0], 
@@ -446,8 +454,8 @@ df = pd.DataFrame({
 
 folder = Path("results")
 folder.mkdir(exist_ok=True, parents=True)
-vtx_u = VTXWriter(mesh.comm, "dfg2D-3-u.bp", [u_], engine="BP4")
-vtx_p = VTXWriter(mesh.comm, "dfg2D-3-p.bp", [p_], engine="BP4")
+vtx_u = VTXWriter(mesh.comm, os.path.join(current_dir, "dfg2D-3-u.bp"), [u_], engine="BP4")
+vtx_p = VTXWriter(mesh.comm, os.path.join(current_dir, "dfg2D-3-p.bp"), [p_], engine="BP4")
 vtx_u.write(t)
 vtx_p.write(t)
 progress = tqdm.autonotebook.tqdm(desc="Solving PDE", total=num_steps)
@@ -547,14 +555,14 @@ vtx_u.close()
 vtx_p.close()
 # -
 
-df.to_csv("reference_solution.csv")
+df.to_csv(os.path.join(current_dir, "reference_solution.csv"))
 
 # ## Visualization
 
 # +
 import sys
 import os
-sys.path.append(os.path.join("..", ".."))
+sys.path.append(os.path.join(current_dir, "..", ".."))  
 
 import numpy as np
 from pyDOE import lhs
@@ -591,4 +599,4 @@ else:
     fig_as_array = plotter.screenshot("glyphs.png")
 # -
 
-np.save("coordinates_for_visualization.npy", geometry)
+np.save(os.path.join(current_dir, "coordinates_for_visualization.npy"), geometry)

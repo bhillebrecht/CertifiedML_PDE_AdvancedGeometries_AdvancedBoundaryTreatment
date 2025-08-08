@@ -28,8 +28,12 @@ the certification preparation via
 and the evaluation via 
 >python base_framework/certified_pinn.py -t user -u base_framework/heat_equation_soft_bcs/heat_equation.py run -i base_framework/heat_equation_soft_bcs/input_data/test_data/\<filename\> -ae domain -eps 0.1
 
-The data is then summarized using 
+The data is then summarized and plotted using 
 > python base_framework/heat_equation_soft_bcs/output_data/run_tanh_values/join_error_json.py
+
+The script generates two files in the folder where the script is located
+1) all_errors_plotted_0_05.pdf : contains the plot of the error contributions, the total error and the reference error 
+2) run_tanh_test_data_t_error_over_time.csv : contains all error contributions, total errors and reference errors in one csv file, the data stored in this file is the basis for the plot in all_errors_plotted_0_05.pdf.
 
 The different parametrizations of the training weighting of the boundary error and its temporal derivative can be found in different folders listed in the following table.
 
@@ -72,6 +76,8 @@ Then, there are three main scripts which need to be used
     > jupytext --to py fem_discretization_framework/src/flow_around_cylinder/characteristic_params.py
 
     Executing this script generates a csv table [characteristic_parameters_stokes.csv](fem_discretization_framework/output_data/flow_around_cylinder/characteristic_parameters_stokes.csv) containing the computed values for omega and the two operator norms.
+
+    Please note, that the number of refinements is limited in ln. 101 to 10 (i.e. n_refine = 10), in the publication 42 refinements were used (i.e. until 100_000 were in the refined mesh).
 
 ### Step 2: Train and evaluate PINN
 
