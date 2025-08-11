@@ -81,7 +81,7 @@ y_0 = 0.0
 H = 0.41
 
 # buffer to allow for non-trivial inlets and outlets
-x_buffer = 0.0
+x_buffer = 0.5
 x_0 = x_0_base - x_buffer
 
 ##### Circular obstacle
@@ -90,7 +90,7 @@ c_x = c_y = 0.2
 r = 0.05
 
 ##### BC modelling (drop inlet and outlet)
-only_dirichlet = False
+only_dirichlet = True
 
 # %%
 # initialize everything
@@ -144,81 +144,32 @@ if mesh_comm.rank == model_rank:
         gmsh.model.setPhysicalName(1, outlet_marker, "Outlet")
 
 # %%
-# introduces a subdivision of the arc elements of the circle, uncomment if necessary
-
-## parameters
-#h_circle = 0.005            # desired mesh size on circle
-#narc = 64                   # number of arc segments
-#
-## 1) define the points on the circle boundary, capturing their tags
-#circle_point_tags = []
-#for i in range(narc):
-#    theta = 2*np.pi*i/narc
-#    x = c_x + r*np.cos(theta)
-#    y = c_y + r*np.sin(theta)
-#    # 4th argument = nominal mesh size at this point
-#    tag = gmsh.model.geo.addPoint(x, y, 0, h_circle)
-#    circle_point_tags.append(tag)
-#
-## 2) connect them with circle‐arcs (so you keep the true curved geometry)
-#circle_arc_tags = []
-#for i in range(narc):
-#    start = circle_point_tags[i]
-#    end   = circle_point_tags[(i+1) % narc]
-#    # center point of the circle as the arc center
-#    center_pt = gmsh.model.geo.addPoint(c_x, c_y, 0, h_circle)
-#    arc_tag = gmsh.model.geo.addCircleArc(start, center_pt, end)
-#    circle_arc_tags.append(arc_tag)
-#
-#gmsh.model.geo.synchronize()
-
-# %%
-for i in range(60):
-    index = i+1
-    divisor = i+1
-    meshmax = 0.1/divisor
-    res_min = r / 3
-    if mesh_comm.rank == model_rank:
-        distance_field = gmsh.model.mesh.field.add("Distance")
-        gmsh.model.mesh.field.setNumbers(distance_field, "EdgesList", obstacle)
-        threshold_field = gmsh.model.mesh.field.add("Threshold")
-        gmsh.model.mesh.field.setNumber(threshold_field, "IField", distance_field)
-        gmsh.model.mesh.field.setNumber(threshold_field, "LcMin", res_min)
-        gmsh.model.mesh.field.setNumber(threshold_field, "LcMax", 0.25 * H)
-        gmsh.model.mesh.field.setNumber(threshold_field, "DistMin", r)
-        gmsh.model.mesh.field.setNumber(threshold_field, "DistMax", 2 * H)
-        min_field = gmsh.model.mesh.field.add("Min")
-        gmsh.model.mesh.field.setNumbers(min_field, "FieldsList", [threshold_field])
-        gmsh.model.mesh.field.setAsBackgroundMesh(min_field)
-
-        gmsh.option.setNumber("Mesh.MeshSizeMax", meshmax)
-
-        gmsh.model.mesh.generate(1)
-        gmsh.option.setNumber("Mesh.MeshSizeFromCurvature",       1)
-        gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 1)
-
-        gmsh.option.setNumber("Mesh.Algorithm", 6)
-        gmsh.model.mesh.generate(2)
-        gmsh.model.mesh.setOrder(1)
-        gmsh.model.mesh.optimize("Laplace2D")
-
-        msh, _, ft = gmshio.model_to_mesh(gmsh.model, mesh_comm, model_rank, gdim=gdim)
-        ft.name = "mesh_tags"
-
-        print("NUMBER OF POINTS : ", msh.geometry.x.shape[0], " (Iteration "+str(i)+")")
-        if msh.geometry.x.shape[0] > 100000:
-            print("STOPPED AT ITERATION "+str(i)+" BECAUSE NUMBER OF NODES EXCEEDED 100.000")
-            break
-
-        filename =  "flow_around_cylinder_mesh_xoff_"+str(x_buffer)
-        if only_dirichlet:
-            filename = filename + "_only_dirichlet"
-        filename = filename +"_"+str(index)+".xdmf"
-        with XDMFFile(MPI.COMM_WORLD, os.path.join(current_dir, filename), "w") as file:
-            file.write_mesh(msh)
-            file.write_meshtags(ft, msh.geometry)
-            file.close()
-
+meshmax = 0.1/3.5
+res_min = r / 3
+if mesh_comm.rank == model_rank:
+    distance_field = gmsh.model.mesh.field.add("Distance")
+    gmsh.model.mesh.field.setNumbers(distance_field, "EdgesList", obstacle)
+    threshold_field = gmsh.model.mesh.field.add("Threshold")
+    gmsh.model.mesh.field.setNumber(threshold_field, "IField", distance_field)
+    gmsh.model.mesh.field.setNumber(threshold_field, "LcMin", res_min)
+    gmsh.model.mesh.field.setNumber(threshold_field, "LcMax", 0.25 * H)
+    gmsh.model.mesh.field.setNumber(threshold_field, "DistMin", r)
+    gmsh.model.mesh.field.setNumber(threshold_field, "DistMax", 2 * H)
+    min_field = gmsh.model.mesh.field.add("Min")
+    gmsh.model.mesh.field.setNumbers(min_field, "FieldsList", [threshold_field])
+    gmsh.model.mesh.field.setAsBackgroundMesh(min_field)
+    gmsh.option.setNumber("Mesh.MeshSizeMax", meshmax)
+    gmsh.model.mesh.generate(1)
+    gmsh.option.setNumber("Mesh.MeshSizeFromCurvature",       1)
+    gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 1)
+    gmsh.option.setNumber("Mesh.Algorithm", 6)
+    gmsh.model.mesh.generate(2)
+    gmsh.model.mesh.setOrder(1)
+    gmsh.model.mesh.optimize("Laplace2D")
+    msh, _, ft = gmshio.model_to_mesh(gmsh.model, mesh_comm, model_rank, gdim=gdim)
+    ft.name = "mesh_tags"
+    print("NUMBER OF POINTS : ", msh.geometry.x.shape[0])
+    
 # %% [markdown]
 # ### Plot
 
