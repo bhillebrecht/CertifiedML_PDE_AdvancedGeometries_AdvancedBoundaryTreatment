@@ -1,10 +1,8 @@
 [![arXiv][arxiv-shield]][arxiv-url]
 <!--[![DOI][doi-shield]][doi-url]-->
 
-[doi-shield]: 
-[doi-url]: 
-[arxiv-shield]: 
-[arxiv-url]: 
+[arxiv-shield]:https://img.shields.io/badge/arXiv-2508.07994-b31b1b.svg?style=for-the-badge
+[arxiv-url]:http://arxiv.org/abs/2508.07994
 [project-url]:https://github.com/bhillebrecht/CertifiedML_PDE_AdvancedGeometries_AdvancedBoundaryTreatment
 
 
@@ -33,7 +31,7 @@ If you use this project for academic work, please consider citing our
 
     Birgit Hillebrecht and Benjamin Unger
     Prediction error certification for PINNs: Theory, computation, and application to Stokes flow
-    ArXiv e-print available.
+    ArXiv e-print 2508.07994 (https://doi.org/10.48550/arXiv.2508.07994)
 
 ## Setup
 
@@ -180,7 +178,7 @@ to then view the results in a python notebook which is created from a python fil
 
 ## References
 
-[1] Birgit Hillebrecht and Benjamin Unger, "Prediction error certification for PINNs: Theory, computation, and application to Stokes flow", arXiv preprint available.
+[1] Birgit Hillebrecht and Benjamin Unger, "Prediction error certification for PINNs: Theory, computation, and application to Stokes flow", arXiv preprint 2508.07994 [available](https://doi.org/10.48550/arXiv.2508.07994).
 
 [2] Mariella Kast, Jan S. Hesthaven. "Positional embeddings for solving PDEs with evolutional deep neural networks", Journal of Computational Physics, Volume 508, 2024, 112986, ISSN 0021-9991, https://doi.org/10.1016/j.jcp.2024.112986.
 
